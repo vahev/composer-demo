@@ -1,0 +1,34 @@
+on:
+
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+  push:
+    branches: [main]
+
+jobs:
+
+  prod_quality_checks:
+    name: Quality checks for DAGs
+    if: ${{ github.event_name == 'pull_request' && github.base_ref == 'main' }}
+    uses: ./.github/workflows/_checks.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: prod
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  prod_deployment:
+    name: Deploy DAGs to prod environment
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.base_ref == 'main' }}
+    uses: ./.github/workflows/_deployment.yaml
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: prod
+      ref: ${{ github.sha }}
+    secrets: inherit

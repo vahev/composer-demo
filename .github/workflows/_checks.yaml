@@ -1,0 +1,43 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: Name of the target environment.    
+      ref:  
+        type: string
+        required: true
+        description: The tag or SHA to checkout.
+
+jobs:
+  lint_dags:
+    name: Lint Airflow DAGs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        pip install flake8
+
+    - name: Lint DAGs
+      run: |
+        flake8 ./dags
+
+  run_unit_tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        ls && pip install -r requirements.txt
+
+    - name: Run unit tests
+      run: |
+        python -m unittest discover -s ./dags -p "dag_test.py"

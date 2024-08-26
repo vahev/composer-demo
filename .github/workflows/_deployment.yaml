@@ -1,0 +1,34 @@
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+        description: Name of the target environment.    
+      ref:  
+        type: string
+        required: true
+        description: The tag or SHA to checkout.
+
+jobs:
+  deploy_dags:
+    name: Deploy DAGs to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ inputs.ref }}
+
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+    - name: Deploy DAGs 
+      run: |
+            gcloud storage cp ./dags/*.py "${{ env.GCS_DAGS_URL }}" | grep -v "test.py$"
