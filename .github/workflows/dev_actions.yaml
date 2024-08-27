@@ -1,0 +1,32 @@
+name: Development CI Process
+run-name: Testing GitHub actions 🚀
+on:
+
+  pull_request:
+    branches: [main] # Trigger on PRs to both main and prod
+    types: [opened, synchronize, reopened]
+
+jobs:
+
+  quality_checks:  # Renamed for clarity, applies to both dev and prod
+    name: PR Quality Checks
+    if: github.event_name == 'pull_request'  # Run on any PR
+    uses: ./.github/workflows/_checks.yaml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: ${{ github.base_ref }}  # Dynamically set environment based on target branch
+      ref: ${{ github.sha }}
+    secrets: inherit
+
+  dev_deployment:
+    uses: ./.github/workflows/_deployment.yaml
+    needs: quality_checks
+    permissions: 
+      id-token: write
+      contents: read
+    with: 
+      environment: dev
+      ref: ${{ github.sha }}
+    secrets: inherit
