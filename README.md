@@ -1,5 +1,6 @@
 # composer-demo
-A demo for setting up Composer
+A demo for setting up Composer.
+[WIP]
 
 
 ### Composer Local Setup
