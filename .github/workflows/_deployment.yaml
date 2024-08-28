@@ -11,11 +11,13 @@ on:
         description: The tag or SHA to checkout.
 
 jobs:
-  deploy_dags:
+
+  deploy:
     name: Deploy DAGs to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment: 
-      name: production
+      name: ${{ inputs.environment }}
+      
 
     steps:
     - name: Checkout code
@@ -23,12 +25,25 @@ jobs:
       with:
         ref: ${{ inputs.ref }}
 
-    - id: 'auth'
-      uses: 'google-github-actions/auth@v0'
+    - id: auth
+      uses: google-github-actions/auth@v2
       with:
         workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
         service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
     - name: Deploy DAGs 
       run: |
-            gcloud storage cp ./dags/*.py "${{ env.GCS_DAGS_URL }}" | grep -v "test.py$"
+            gcloud storage cp ./dags/[!test]*.py "${{ vars.GCS_DAGS_URL }}"
+
+#  prod_deployment:
+#    name: Deploy DAGs to prod environment
+#    needs: quality_checks
+#    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.base_ref == 'prod' }}
+#    uses: ./.github/workflows/_deployment.yaml 
+#    permissions:
+#      id-token: write
+#      contents: read
+#    with: 
+#      environment: prod
+#      ref: ${{ github.sha }}
+#    secrets: inherit

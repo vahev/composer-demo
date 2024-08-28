@@ -27,17 +27,22 @@ jobs:
       run: |
         flake8 ./dags
 
-  run_unit_tests:
+  unit_tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
-        ls && pip install -r requirements.txt
+        pwd && ls && pip install -r requirements.txt
+
+    - name: Init Airflow db
+      run: |
+        airflow db init
 
     - name: Run unit tests
       run: |
-        python -m unittest discover -s ./dags -p "dag_test.py"
+        python -m unittest discover -s ./dags
