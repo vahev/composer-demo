@@ -2,6 +2,7 @@
 A demo for setting up Composer.
 [ WIP ]
 Some extra line
+Second line
 
 ### Composer Local Setup
 
